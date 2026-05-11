@@ -1,0 +1,25 @@
+# Data files — regenerate from MATLAB
+pla_data/
+*.csv
+*.pkl
+
+# Audit log
+audit_log.jsonl
+
+# Python virtual environment
+pla-env/
+__pycache__/
+*.pyc
+
+# Compiled binaries — build from source
+srsRAN_Project/build/
+srsRAN_4G/build/
+UERANSIM/build/
+
+# Keycloak sensitive data
+*.jks
+*.p12
+
+# OS
+.DS_Store
+Thumbs.db

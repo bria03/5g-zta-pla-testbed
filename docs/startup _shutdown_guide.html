@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZTA + PLA Pipeline — Startup & Shutdown Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #191d28;
+    --border: #1f2530;
+    --accent: #00d4ff;
+    --green: #7fff6a;
+    --yellow: #ffcc44;
+    --red: #ff6b6b;
+    --purple: #c0a0ff;
+    --text: #c8d0e0;
+    --text-dim: #5a6478;
+    --text-bright: #edf2ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 32px 28px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 12px; color: var(--text-dim); margin-top: 5px; }
+
+  /* TOC */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .toc-head {
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 9px;
+    margin-bottom: 8px;
+  }
+
+  .toc-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 30px;
+  }
+
+  .toc-cols a { color: var(--accent); text-decoration: none; font-size: 11px; }
+  .toc-cols a:hover { text-decoration: underline; }
+  .toc-num { color: var(--text-dim); margin-right: 5px; }
+
+  /* Notice boxes */
+  .notice {
+    padding: 11px 15px;
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .notice.yellow {
+    background: rgba(255,204,68,0.06);
+    border: 1px solid rgba(255,204,68,0.22);
+    border-left: 3px solid var(--yellow);
+    color: var(--text);
+  }
+
+  .notice.red {
+    background: rgba(255,107,107,0.06);
+    border: 1px solid rgba(255,107,107,0.22);
+    border-left: 3px solid var(--red);
+    color: var(--text);
+  }
+
+  .notice .nh {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .notice.yellow .nh { color: var(--yellow); }
+  .notice.red .nh { color: var(--red); }
+
+  /* Section headers */
+  .section { margin-bottom: 36px; scroll-margin-top: 20px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-radius: 3px 3px 0 0;
+    border-bottom: none;
+  }
+
+  .section-header.startup {
+    background: rgba(0,212,255,0.07);
+    border: 1px solid rgba(0,212,255,0.2);
+  }
+
+  .section-header.shutdown {
+    background: rgba(255,107,107,0.07);
+    border: 1px solid rgba(255,107,107,0.2);
+  }
+
+  .sec-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 24px;
+  }
+
+  .sec-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .section-header.startup .sec-title { color: var(--accent); }
+  .section-header.shutdown .sec-title { color: var(--red); }
+
+  .sec-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  .badge-auto { background: rgba(127,255,106,0.1); color: var(--green); border: 1px solid rgba(127,255,106,0.25); }
+  .badge-manual { background: rgba(255,204,68,0.1); color: var(--yellow); border: 1px solid rgba(255,204,68,0.25); }
+  .badge-windows { background: rgba(192,160,255,0.1); color: var(--purple); border: 1px solid rgba(192,160,255,0.25); }
+  .badge-shutdown { background: rgba(255,107,107,0.1); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
+
+  .section-body {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+    padding: 16px 20px;
+  }
+
+  /* Steps */
+  .step { margin-bottom: 16px; }
+  .step:last-child { margin-bottom: 0; }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    min-width: 20px;
+  }
+
+  .step-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-bright);
+    flex: 1;
+  }
+
+  .terminal-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .t1 { background: rgba(0,212,255,0.1); color: #78d8f0; border: 1px solid rgba(0,212,255,0.2); }
+  .t2 { background: rgba(127,255,106,0.1); color: #9feea0; border: 1px solid rgba(127,255,106,0.2); }
+  .t3 { background: rgba(255,204,68,0.1); color: var(--yellow); border: 1px solid rgba(255,204,68,0.2); }
+  .t4 { background: rgba(192,160,255,0.1); color: var(--purple); border: 1px solid rgba(192,160,255,0.2); }
+  .t5 { background: rgba(255,107,107,0.1); color: #ff9a9a; border: 1px solid rgba(255,107,107,0.2); }
+  .twin { background: rgba(192,160,255,0.15); color: var(--purple); border: 1px solid rgba(192,160,255,0.3); }
+  .tbg { background: rgba(100,100,120,0.15); color: #8899aa; border: 1px solid rgba(100,100,120,0.3); }
+
+  .phase-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .step-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+    margin-left: 30px;
+    line-height: 1.55;
+  }
+
+  .step-note strong { color: var(--text); }
+
+  pre {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 11px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: #a8c0d8;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin-left: 30px;
+  }
+
+  .comment { color: #3d5068; }
+
+  .verify-box {
+    margin-top: 8px;
+    margin-left: 30px;
+    background: rgba(127,255,106,0.04);
+    border: 1px solid rgba(127,255,106,0.15);
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+
+  .verify-box .vl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+
+  /* Terminal legend */
+  .terminal-legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    align-items: center;
+  }
+
+  .tl-head {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .tl-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text);
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">ZTA + PLA Private 5G Testbed · Ubuntu 24.04 WSL2</div>
+  <h1>Pipeline <span>Startup & Shutdown</span> Guide</h1>
+  <div class="subtitle">Full pipeline — Phases 1 through 8 · Follow startup steps in exact order · Shutdown in reverse</div>
+</header>
+
+<div class="terminal-legend">
+  <div class="tl-head">Terminal Color Key</div>
+  <div class="tl-item"><span class="terminal-badge t1">TERMINAL 1</span> srsRAN Project gNB</div>
+  <div class="tl-item"><span class="terminal-badge t2">TERMINAL 2</span> UERANSIM gNB</div>
+  <div class="tl-item"><span class="terminal-badge t3">TERMINAL 3</span> UERANSIM UE</div>
+  <div class="tl-item"><span class="terminal-badge t4">TERMINAL 4</span> Keycloak</div>
+  <div class="tl-item"><span class="terminal-badge t5">TERMINAL 5</span> PLA Exporter</div>
+  <div class="tl-item"><span class="terminal-badge twin">WINDOWS</span> MATLAB</div>
+  <div class="tl-item"><span class="terminal-badge tbg">BACKGROUND</span> Runs as system service — no terminal needed</div>
+</div>
+
+<div class="toc">
+  <div class="toc-head">Contents</div>
+  <div class="toc-cols">
+    <div><span class="toc-num">▸</span><a href="#startup">STARTUP — Steps 1–10</a></div>
+    <div><span class="toc-num">▸</span><a href="#shutdown">SHUTDOWN — Steps in reverse</a></div>
+    <div><span class="toc-num">▸</span><a href="#run">RUNNING THE PIPELINE</a></div>
+    <div><span class="toc-num">▸</span><a href="#verify">QUICK HEALTH CHECK</a></div>
+  </div>
+</div>
+
+<div class="notice yellow">
+  <div class="nh">▸ IMPORTANT — ORDER MATTERS</div>
+  Always start components in the exact order listed below. The core network must be up before the RAN connects, the RAN must be up before the UE attaches, and the PLA exporter must be running before Prometheus can scrape data. Starting out of order will cause connection failures that require restarting multiple components.
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- STARTUP -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section" id="startup">
+  <div class="section-header startup">
+    <span class="sec-num">▸</span>
+    <span class="sec-title">STARTUP SEQUENCE</span>
+    <span class="sec-badge badge-manual">RUN IN ORDER</span>
+  </div>
+  <div class="section-body">
+
+    <!-- STEP 1 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">01</span>
+        <span class="step-name">Verify Open5GS Core Services</span>
+        <span class="terminal-badge tbg">BACKGROUND</span>
+        <span class="phase-tag">Phase 1</span>
+      </div>
+      <div class="step-note">Open5GS services auto-start on boot. Verify they are running before proceeding. If any show <strong>inactive</strong>, run the start command below.</div>
+      <pre><span class="comment"># Check AMF and UPF status</span>
+sudo systemctl status open5gs-amfd
+sudo systemctl status open5gs-upfd
+
+<span class="comment"># If any are stopped, start all core NFs</span>
+sudo systemctl start open5gs-amfd open5gs-upfd open5gs-smfd \
+  open5gs-nrfd open5gs-ausfd open5gs-udmd open5gs-udrd \
+  open5gs-pcfd open5gs-nssfd open5gs-bsfd</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Both AMF and UPF show <strong style="color:var(--green)">Active: active (running)</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 2 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">02</span>
+        <span class="step-name">Restore ogstun Interface</span>
+        <span class="terminal-badge tbg">ANY TERMINAL</span>
+        <span class="phase-tag">Phase 1</span>
+      </div>
+      <div class="step-note">The ogstun TUN interface does not persist across reboots. Must be recreated every session. The <strong>2>/dev/null</strong> suppresses errors if it already exists.</div>
+      <pre><span class="comment"># Recreate ogstun interface for UPF data plane</span>
+sudo ip tuntap add name ogstun mode tun 2>/dev/null
+sudo ip addr add 10.45.0.1/16 dev ogstun 2>/dev/null
+sudo ip link set ogstun up
+sudo iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        <code style="font-family:monospace;font-size:11px;">ip addr show ogstun</code> shows <strong style="color:var(--green)">10.45.0.1/16</strong> assigned and state UP
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 3 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">03</span>
+        <span class="step-name">Verify Prometheus & Grafana</span>
+        <span class="terminal-badge tbg">BACKGROUND</span>
+        <span class="phase-tag">Phase 8</span>
+      </div>
+      <div class="step-note">Both run as system services and persist across reboots. Verify they are up before starting the pipeline so monitoring is ready when data flows.</div>
+      <pre><span class="comment"># Check status</span>
+sudo systemctl status prometheus
+sudo systemctl status grafana-server
+
+<span class="comment"># If stopped, start them</span>
+sudo systemctl start prometheus grafana-server</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Prometheus UI → <strong style="color:var(--accent)">http://localhost:9091</strong><br>
+        Grafana UI → <strong style="color:var(--accent)">http://localhost:3000</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 4 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">04</span>
+        <span class="step-name">Start OPA Policy Engine</span>
+        <span class="terminal-badge tbg">ANY TERMINAL</span>
+        <span class="phase-tag">Phase 5</span>
+      </div>
+      <div class="step-note">OPA does not run as a system service — start it manually. Run in the background with <strong>&</strong> or in a dedicated terminal. Listens on port 8181.</div>
+      <pre><span class="comment"># Start OPA server in background</span>
+opa run --server --log-level info &
+
+<span class="comment"># Reload the ZTA policy</span>
+curl -X PUT http://localhost:8181/v1/policies/zta_access \
+  -H "Content-Type: text/plain" \
+  --data-binary @/home/$USER/opa_policies/zta_policy.rego</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        curl returns <strong style="color:var(--green)">{}</strong> on policy load — empty object means success
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 5 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">05</span>
+        <span class="step-name">Start Keycloak Identity Provider</span>
+        <span class="terminal-badge t4">TERMINAL 4</span>
+        <span class="phase-tag">Phase 6</span>
+      </div>
+      <div class="step-note">Keycloak runs in dev mode. Open a dedicated terminal and leave it running — it logs to this terminal. First startup takes ~30–60 seconds.</div>
+      <pre><span class="comment"># Start Keycloak in dev mode</span>
+export KEYCLOAK_ADMIN=admin
+export KEYCLOAK_ADMIN_PASSWORD=changeme
+sudo -E -u keycloak /opt/keycloak/bin/kc.sh start-dev</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Browser → <strong style="color:var(--accent)">http://localhost:8080</strong> — Keycloak welcome page loads.<br>
+        Log in to Administration Console and confirm <strong>private5G</strong> realm and four UE users exist.
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 6 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">06</span>
+        <span class="step-name">Start srsRAN Project gNB</span>
+        <span class="terminal-badge t1">TERMINAL 1</span>
+        <span class="phase-tag">Phase 2</span>
+      </div>
+      <div class="step-note">The srsRAN Project gNB connects to the Open5GS AMF over the N2 interface. Open a dedicated terminal and leave it running.</div>
+      <pre><span class="comment"># Navigate to build directory and start gNB</span>
+cd ~/srsRAN_Project/build
+sudo ./apps/gnb/gnb -c /etc/srsran/gnb_zmq.yaml</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Output shows: <strong style="color:var(--green)">N2: Connection to AMF on 127.0.0.5:38412 completed</strong><br>
+        Followed by: <strong style="color:var(--green)">==== gNB started ===</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 7 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">07</span>
+        <span class="step-name">Start UERANSIM gNB</span>
+        <span class="terminal-badge t2">TERMINAL 2</span>
+        <span class="phase-tag">Phase 3</span>
+      </div>
+      <div class="step-note">UERANSIM's gNB simulator connects to the same Open5GS AMF and handles the UE attach procedure. Open a second dedicated terminal.</div>
+      <pre><span class="comment"># Start UERANSIM gNB</span>
+cd ~/UERANSIM
+sudo build/nr-gnb -c config/gnb.yaml</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Output shows: <strong style="color:var(--green)">NG Setup procedure is successful</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 8 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">08</span>
+        <span class="step-name">Start UERANSIM UE</span>
+        <span class="terminal-badge t3">TERMINAL 3</span>
+        <span class="phase-tag">Phase 3</span>
+      </div>
+      <div class="step-note">The simulated UE attaches to the core network through UERANSIM's gNB, authenticates via 5G AKA, and establishes a PDU session. Open a third dedicated terminal.</div>
+      <pre><span class="comment"># Start UERANSIM UE</span>
+cd ~/UERANSIM
+sudo build/nr-ue -c config/ue.yaml</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Output shows: <strong style="color:var(--green)">Initial Registration is successful</strong><br>
+        Followed by: <strong style="color:var(--green)">Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.2] is up</strong><br>
+        Open5GS WebUI at <strong style="color:var(--accent)">http://localhost:9999</strong> shows subscriber as <strong>SERVICE_GRANTED</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 9 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">09</span>
+        <span class="step-name">Start PLA Prometheus Exporter</span>
+        <span class="terminal-badge t5">TERMINAL 5</span>
+        <span class="phase-tag">Phase 8</span>
+      </div>
+      <div class="step-note">The PLA exporter computes trust scores from the trained SVM model and exposes them to Prometheus every 15 seconds. Activate the Python virtual environment first.</div>
+      <pre><span class="comment"># Activate venv and start exporter</span>
+source ~/pla-env/bin/activate
+python3 ~/pla_data/pla_exporter.py</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Output shows: <strong style="color:var(--green)">PLA Prometheus exporter running on port 9200</strong><br>
+        Prometheus targets at <strong style="color:var(--accent)">http://localhost:9091/targets</strong> shows <strong>pla_pipeline UP</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STEP 10 -->
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">10</span>
+        <span class="step-name">Generate MATLAB Features (if retraining)</span>
+        <span class="terminal-badge twin">WINDOWS — MATLAB</span>
+        <span class="phase-tag">Phase 4</span>
+      </div>
+      <div class="step-note">Only required if regenerating signal data or retraining the SVM. If the existing <strong>features.csv</strong> and saved model files are still present from the last session, skip this step — the exporter and bridge use the saved model directly.</div>
+      <pre><span class="comment">% In MATLAB on Windows — only run if retraining</span>
+<span class="comment">% 1. Open generate_pla_features.m</span>
+<span class="comment">% 2. Run script — writes features.csv to WSL2 shared path</span>
+<span class="comment">% 3. Then in Ubuntu terminal:</span>
+source ~/pla-env/bin/activate
+python3 ~/pla_data/pla_classifier.py</pre>
+      <div class="verify-box">
+        <div class="vl">▸ VERIFY</div>
+        Python classifier prints classification report and saves updated <strong>svm_model.pkl</strong> and <strong>scaler.pkl</strong> to <strong>~/pla_data/</strong>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- RUNNING THE PIPELINE -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section" id="run">
+  <div class="section-header startup">
+    <span class="sec-num">▸</span>
+    <span class="sec-title">RUNNING THE PIPELINE</span>
+    <span class="sec-badge badge-manual">ON DEMAND</span>
+  </div>
+  <div class="section-body">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">—</span>
+        <span class="step-name">Run ZTA Bridge (Full End-to-End Evaluation)</span>
+        <span class="terminal-badge tbg">ANY TERMINAL</span>
+        <span class="phase-tag">Phase 7</span>
+      </div>
+      <div class="step-note">Run the bridge script to execute a full ZTA evaluation for all four devices. Each run evaluates PLA trust scores → Keycloak identity → OPA policy decision and logs results to the audit log. Run this as many times as needed.</div>
+      <pre><span class="comment"># Run full pipeline evaluation</span>
+source ~/pla-env/bin/activate
+python3 ~/pla_data/zta_bridge.py</pre>
+      <div class="verify-box">
+        <div class="vl">▸ EXPECTED OUTPUT</div>
+        Device 1 (Legitimate) → Trust ~0.79 → <strong style="color:var(--green)">UCA_GRANT</strong><br>
+        Device 2 (Legitimate) → Trust ~0.52 → <strong style="color:var(--red)">UCA_DENY</strong> (unauthorized slice)<br>
+        Device 3 (Rogue) &nbsp;&nbsp;&nbsp;&nbsp;→ Trust ~0.31 → <strong style="color:var(--red)">TSA_DENY</strong><br>
+        Device 4 (Rogue) &nbsp;&nbsp;&nbsp;&nbsp;→ Trust ~0.13 → <strong style="color:var(--red)">TSA_DENY</strong>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">—</span>
+        <span class="step-name">View Grafana Dashboard</span>
+        <span class="terminal-badge tbg">BROWSER</span>
+        <span class="phase-tag">Phase 8</span>
+      </div>
+      <div class="step-note">Dashboard updates every 15 seconds as the exporter scrapes new trust scores. After running the bridge, refresh the dashboard to see updated decision counts.</div>
+      <pre><span class="comment"># Open in browser</span>
+http://localhost:3000
+<span class="comment"># Navigate to Dashboards → ZTA + PLA Pipeline</span></pre>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SHUTDOWN -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section" id="shutdown">
+  <div class="section-header shutdown">
+    <span class="sec-num">▸</span>
+    <span class="sec-title">SHUTDOWN SEQUENCE</span>
+    <span class="sec-badge badge-shutdown">REVERSE ORDER</span>
+  </div>
+  <div class="section-body">
+
+    <div class="notice red" style="margin-bottom:16px;">
+      <div class="nh">▸ SHUTDOWN ORDER</div>
+      Always shut down in reverse order — UE first, then RAN, then core-adjacent services. Shutting down the core before the RAN disconnects cleanly can leave stale session state in Open5GS that causes issues on next startup.
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">01</span>
+        <span class="step-name">Stop PLA Exporter</span>
+        <span class="terminal-badge t5">TERMINAL 5</span>
+      </div>
+      <pre>Ctrl+C</pre>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">02</span>
+        <span class="step-name">Stop UERANSIM UE</span>
+        <span class="terminal-badge t3">TERMINAL 3</span>
+      </div>
+      <pre>Ctrl+C</pre>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">03</span>
+        <span class="step-name">Stop UERANSIM gNB</span>
+        <span class="terminal-badge t2">TERMINAL 2</span>
+      </div>
+      <pre>Ctrl+C</pre>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">04</span>
+        <span class="step-name">Stop srsRAN Project gNB</span>
+        <span class="terminal-badge t1">TERMINAL 1</span>
+      </div>
+      <pre>Ctrl+C</pre>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">05</span>
+        <span class="step-name">Stop Keycloak</span>
+        <span class="terminal-badge t4">TERMINAL 4</span>
+      </div>
+      <pre>Ctrl+C</pre>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">06</span>
+        <span class="step-name">Stop OPA</span>
+        <span class="terminal-badge tbg">ANY TERMINAL</span>
+      </div>
+      <pre><span class="comment"># If OPA was started with & (background)</span>
+pkill opa
+
+<span class="comment"># If OPA was started in a dedicated terminal</span>
+Ctrl+C</pre>
+    </div>
+
+    <hr class="divider">
+
+    <div class="step">
+      <div class="step-header">
+        <span class="step-num">07</span>
+        <span class="step-name">Open5GS, Prometheus, Grafana</span>
+        <span class="terminal-badge tbg">BACKGROUND</span>
+      </div>
+      <div class="step-note">These run as system services — they do <strong>not</strong> need to be stopped between sessions. Leave them running. They will persist across reboots automatically.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- HEALTH CHECK -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section" id="verify">
+  <div class="section-header startup">
+    <span class="sec-num">▸</span>
+    <span class="sec-title">QUICK HEALTH CHECK</span>
+    <span class="sec-badge badge-auto">RUN ANYTIME</span>
+  </div>
+  <div class="section-body">
+    <div class="step">
+      <div class="step-note" style="margin-left:0;">Run this to verify all components are up at any point during a session:</div>
+      <pre style="margin-left:0;"><span class="comment"># System services</span>
+sudo systemctl is-active open5gs-amfd open5gs-upfd prometheus grafana-server
+
+<span class="comment"># ogstun interface</span>
+ip link show ogstun | grep "state UP"
+
+<span class="comment"># OPA</span>
+curl -s http://localhost:8181/v1/policies | grep zta_access
+
+<span class="comment"># Keycloak</span>
+curl -s http://localhost:8080/realms/private5G | grep private5G
+
+<span class="comment"># PLA exporter</span>
+curl -s http://localhost:9200/metrics | grep pla_trust_score
+
+<span class="comment"># Prometheus scrape targets</span>
+curl -s http://localhost:9091/api/v1/targets | grep -o '"health":"up"'</pre>
+      <div class="verify-box">
+        <div class="vl">▸ ALL CLEAR</div>
+        Services print <strong style="color:var(--green)">active</strong> · ogstun shows <strong style="color:var(--green)">UP</strong> · OPA returns policy name · Keycloak returns realm JSON · Exporter returns metric lines · Prometheus shows <strong style="color:var(--green)">"health":"up"</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  ZTA + PLA Pipeline · Startup & Shutdown Guide · Ubuntu 24.04 WSL2 · All phases 1–8
+</footer>
+
+</body>
+</html>

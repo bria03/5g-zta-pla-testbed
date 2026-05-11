@@ -1,0 +1,34 @@
+cu_cp:
+  amf:
+    addr: 127.0.0.5
+    bind_addr: 127.0.0.5
+    supported_tracking_areas:
+      - tac: 1
+        plmn_list:
+          - plmn: "99970"
+            tai_slice_support_list:
+              - sst: 1
+
+ru_sdr:
+  device_driver: zmq
+  device_args: tx_port=tcp://*:2000, rx_port=tcp://localhost:2001,base_srate=23.04e6
+  srate: 23.04
+  tx_gain: 75
+  rx_gain: 75
+
+cell_cfg:
+  dl_arfcn: 368500
+  band: 3
+  channel_bandwidth_MHz: 10
+  common_scs: 15
+  plmn: "99970"
+  tac: 1
+
+log:
+  filename: /tmp/gnb.log
+  all_level: info
+
+pcap:
+  mac_enable: false
+  ngap_enable: false
+

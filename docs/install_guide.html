@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup A — Install Guide · Ubuntu 24.04</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #191d28;
+    --border: #1f2530;
+    --accent: #00d4ff;
+    --green: #7fff6a;
+    --yellow: #ffcc44;
+    --red: #ff6b6b;
+    --purple: #c0a0ff;
+    --text: #c8d0e0;
+    --text-dim: #5a6478;
+    --text-bright: #edf2ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 32px 28px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .toc-head {
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 9px;
+    margin-bottom: 8px;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 20px;
+  }
+
+  .toc-list li a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  .toc-list li a:hover { text-decoration: underline; }
+
+  .toc-list .num {
+    color: var(--text-dim);
+    margin-right: 5px;
+  }
+
+  .notice {
+    background: rgba(255,204,68,0.06);
+    border: 1px solid rgba(255,204,68,0.22);
+    border-left: 3px solid var(--yellow);
+    padding: 11px 15px;
+    border-radius: 2px;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .notice .nh {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--yellow);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  /* ── SECTION ─────────────────────────────────────────────── */
+  .section {
+    margin-bottom: 40px;
+    scroll-margin-top: 20px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px 3px 0 0;
+    border-bottom: none;
+  }
+
+  .sec-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 24px;
+  }
+
+  .sec-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .sec-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  .badge-free { background: rgba(127,255,106,0.1); color: var(--green); border: 1px solid rgba(127,255,106,0.25); }
+  .badge-build { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+  .badge-binary { background: rgba(192,160,255,0.1); color: var(--purple); border: 1px solid rgba(192,160,255,0.25); }
+  .badge-java { background: rgba(255,107,107,0.1); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
+
+  .section-body {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+    padding: 18px 20px;
+  }
+
+  .about {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    line-height: 1.6;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about strong { color: var(--text); }
+
+  /* ── STEP ─────────────────────────────────────────────────── */
+  .step {
+    margin-bottom: 18px;
+  }
+
+  .step:last-child { margin-bottom: 0; }
+
+  .step-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .step-label .sl-name {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-right: 6px;
+  }
+
+  .step-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+    line-height: 1.55;
+  }
+
+  .step-note strong { color: var(--text); }
+
+  pre {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: #a8c0d8;
+    overflow-x: auto;
+    line-height: 1.7;
+    white-space: pre;
+  }
+
+  .comment { color: #3d5068; }
+  .cmd { color: #a8c0d8; }
+  .kw { color: var(--accent); }
+  .str { color: var(--green); }
+  .num { color: var(--yellow); }
+
+  .verify-box {
+    margin-top: 10px;
+    background: rgba(127,255,106,0.04);
+    border: 1px solid rgba(127,255,106,0.15);
+    border-radius: 2px;
+    padding: 9px 12px;
+    font-size: 11.5px;
+  }
+
+  .verify-box .vl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    margin-bottom: 5px;
+  }
+
+  .warn-box {
+    margin-top: 10px;
+    background: rgba(255,204,68,0.04);
+    border: 1px solid rgba(255,204,68,0.18);
+    border-radius: 2px;
+    padding: 9px 12px;
+    font-size: 11.5px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .warn-box .wl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--yellow);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">ZTA + PLA Testbed · Setup A · Ubuntu 24.04 LTS x86_64</div>
+  <h1>Install Guide — <span>All Required Software</span></h1>
+  <div class="subtitle">MATLAB + 5G Toolbox assumed already installed. Covers everything else in Setup A, in install order.</div>
+</header>
+
+<div class="toc">
+  <div class="toc-head">Contents</div>
+  <ul class="toc-list">
+    <li><span class="num">01</span><a href="#prereqs">System Prerequisites</a></li>
+    <li><span class="num">02</span><a href="#mongodb">MongoDB</a></li>
+    <li><span class="num">03</span><a href="#open5gs">Open5GS (5G Core)</a></li>
+    <li><span class="num">04</span><a href="#srsran">srsRAN Project + ZMQ (RAN)</a></li>
+    <li><span class="num">05</span><a href="#python">Python ML Stack</a></li>
+    <li><span class="num">06</span><a href="#opa">Open Policy Agent (OPA)</a></li>
+    <li><span class="num">07</span><a href="#keycloak">Keycloak (IdP)</a></li>
+    <li><span class="num">08</span><a href="#prometheus">Prometheus + Grafana</a></li>
+  </ul>
+</div>
+
+<div class="notice">
+  <div class="nh">▸ BEFORE YOU START</div>
+  Install order matters here. MongoDB must be installed before Open5GS. ZMQ must be installed before srsRAN is compiled. Java must be installed before Keycloak. Follow the sections in order top to bottom. All commands assume you are running Ubuntu 24.04 LTS on x86_64 with sudo access.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 01 · PREREQS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="prereqs">
+  <div class="section-header">
+    <span class="sec-num">01</span>
+    <span class="sec-title">System Prerequisites</span>
+    <span class="sec-badge badge-free">APT</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      Run these first. Installs core build tools, networking utilities, and common dependencies needed by everything else in this guide.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Update & install base packages</span></div>
+      <pre><span class="comment"># Update package index and upgrade existing packages</span>
+sudo apt update && sudo apt upgrade -y
+
+<span class="comment"># Install core build tools and utilities</span>
+sudo apt install -y \
+  build-essential cmake gcc g++ git curl wget gnupg \
+  pkg-config software-properties-common \
+  net-tools iproute2 tshark wireshark-common</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Enable IP forwarding</span> (required by Open5GS UPF)</div>
+      <pre><span class="comment"># Enable now</span>
+sudo sysctl -w net.ipv4.ip_forward=1
+
+<span class="comment"># Make it persistent across reboots</span>
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Disable UFW firewall</span> (required by Open5GS for lab use)</div>
+      <div class="step-note">Open5GS uses multiple loopback addresses that UFW blocks by default. Disable for lab purposes.</div>
+      <pre>sudo ufw disable</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 02 · MONGODB -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="mongodb">
+  <div class="section-header">
+    <span class="sec-num">02</span>
+    <span class="sec-title">MongoDB</span>
+    <span class="sec-badge badge-free">APT</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      Open5GS uses MongoDB as its subscriber database (NRF, PCF, UDR). Must be installed before Open5GS. Ubuntu 24.04 (noble) does not have MongoDB in its default repos — you add it from MongoDB's own repo. The jammy (22.04) repo is used because MongoDB has not yet published a noble-specific build, but it works fine on 24.04.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Add MongoDB 8.0 repository & install</span></div>
+      <pre><span class="comment"># Import MongoDB public GPG key</span>
+sudo apt install -y gnupg
+curl -fsSL https://pgp.mongodb.com/server-8.0.asc | \
+  sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor
+
+<span class="comment"># Add repo (using jammy — works on noble/24.04)</span>
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] \
+https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | \
+  sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+
+<span class="comment"># Install</span>
+sudo apt update
+sudo apt install -y mongodb-org
+
+<span class="comment"># Start and enable on boot</span>
+sudo systemctl start mongod
+sudo systemctl enable mongod</pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY</div>
+      <pre style="background:transparent;border:none;padding:0;font-size:11px;">sudo systemctl status mongod</pre>
+      Should show <strong style="color:var(--green)">Active: active (running)</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 03 · OPEN5GS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="open5gs">
+  <div class="section-header">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Open5GS (5G Core)</span>
+    <span class="sec-badge badge-free">PPA</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      Full open-source 5G SA core — runs AMF, UPF, SMF, NRF, and all other 5G core network functions. Install via the official Launchpad PPA, which supports Ubuntu 24.04 (noble). Also installs the WebUI for subscriber management.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Install Open5GS via PPA</span></div>
+      <pre><span class="comment"># Add the official Open5GS PPA</span>
+sudo add-apt-repository ppa:open5gs/latest
+sudo apt update
+sudo apt install -y open5gs</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Install WebUI (subscriber management)</span></div>
+      <div class="step-note">Requires Node.js. The WebUI lets you register virtual UE subscribers in MongoDB via a browser at <strong>http://localhost:9999</strong>.</div>
+      <pre><span class="comment"># Install Node.js (LTS) via NodeSource</span>
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+<span class="comment"># Install the WebUI</span>
+curl -fsSL https://open5gs.org/open5gs/assets/webui/install | sudo -E bash -</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Add TUN interface for UPF</span></div>
+      <div class="step-note">Required for the UPF to route data plane traffic. Run once after install.</div>
+      <pre><span class="comment"># Create ogstun interface (UPF data plane)</span>
+sudo ip tuntap add name ogstun mode tun
+sudo ip addr add 10.45.0.1/16 dev ogstun
+sudo ip addr add 2001:db8:cafe::1/48 dev ogstun
+sudo ip link set ogstun up
+
+<span class="comment"># NAT rule so UE traffic can reach internet/loopback</span>
+sudo iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Start all Open5GS services</span></div>
+      <pre><span class="comment"># All core NFs start automatically after install.</span>
+<span class="comment"># Check they are running:</span>
+sudo systemctl status open5gs-amfd
+sudo systemctl status open5gs-upfd
+sudo systemctl status open5gs-smfd
+
+<span class="comment"># If any are stopped, start manually:</span>
+sudo systemctl start open5gs-amfd open5gs-upfd open5gs-smfd \
+  open5gs-nrfd open5gs-ausfd open5gs-udmd open5gs-udrd \
+  open5gs-pcfd open5gs-nssfd open5gs-bsfd</pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY</div>
+      Open browser → <strong style="color:var(--accent)">http://localhost:9999</strong><br>
+      Login: <code style="font-family:monospace">admin</code> / <code style="font-family:monospace">1423</code><br>
+      You should see the subscriber management dashboard.
+    </div>
+
+    <div class="warn-box" style="margin-top:10px;">
+      <div class="wl">▸ NOTE</div>
+      Default configs bind all NFs to loopback addresses (127.0.0.x). This is correct for a single-machine lab setup — no changes needed yet. You will edit amf.yaml and upf.yaml later when configuring for srsRAN.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 04 · srsRAN PROJECT + ZMQ -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="srsran">
+  <div class="section-header">
+    <span class="sec-num">04</span>
+    <span class="sec-title">srsRAN Project + ZeroMQ (Virtual RAN)</span>
+    <span class="sec-badge badge-build">BUILD FROM SOURCE</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      srsRAN Project is the 5G NR gNodeB software stack. For Setup A, it runs in <strong>ZMQ mode</strong> — no radio hardware needed. ZMQ replaces the RF frontend with TCP sockets, allowing a virtual gNB to connect to Open5GS over the N2/N3 interfaces. Must be compiled from source with ZMQ enabled. Build takes 5–15 minutes depending on your machine. Requires at least 4 CPU cores and 4 GB RAM to run.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 1 — Install build dependencies</span></div>
+      <pre>sudo apt-get install -y \
+  cmake make gcc g++ pkg-config \
+  libfftw3-dev libmbedtls-dev libsctp-dev \
+  libyaml-cpp-dev libgtest-dev</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 2 — Install ZeroMQ</span></div>
+      <div class="step-note">ZMQ must be installed <strong>before</strong> srsRAN is compiled. If you compile srsRAN first and then add ZMQ, you must delete the build directory and recompile.</div>
+      <pre><span class="comment"># Install ZMQ dev package from apt</span>
+sudo apt-get install -y libzmq3-dev</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 3 — Clone and build srsRAN Project</span></div>
+      <div class="step-note">The <code>-DENABLE_ZEROMQ=ON</code> flag is critical. Watch the cmake output and confirm it detects ZMQ (see verify box below).</div>
+      <pre><span class="comment"># Clone the repository</span>
+git clone https://github.com/srsran/srsRAN_Project.git
+cd srsRAN_Project
+mkdir build && cd build
+
+<span class="comment"># Configure with ZMQ enabled</span>
+cmake ../ -DENABLE_EXPORT=ON -DENABLE_ZEROMQ=ON
+
+<span class="comment"># Build (uses all available CPU cores)</span>
+make -j$(nproc)
+
+<span class="comment"># Optional: install system-wide</span>
+sudo make install</pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY ZMQ WAS DETECTED DURING CMAKE</div>
+      In the cmake output, look for this line:<br>
+      <code style="font-family:monospace;font-size:11px;color:var(--green)">-- Found libZEROMQ: /usr/local/include, /usr/local/lib/libzmq.so</code><br>
+      If it says <em>No package 'ZeroMQ' found</em>, ZMQ was not installed before cmake ran — delete the build dir, reinstall libzmq3-dev, and rerun cmake.
+    </div>
+
+    <div class="warn-box" style="margin-top:10px;">
+      <div class="wl">▸ NOTE ON CPU CORES</div>
+      When running the ZMQ gNB (not just compiling), srsRAN Project requires 5+ CPU cores to successfully start up and accept UE connections. This is a runtime constraint, not a compile constraint.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 05 · PYTHON ML STACK -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="python">
+  <div class="section-header">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Python ML Stack (PLA Classifier)</span>
+    <span class="sec-badge badge-free">PIP</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      Python 3 is already on Ubuntu 24.04. This step installs the scientific/ML libraries used for the PLA feature extraction and classifier pipeline: scikit-learn for the SVM/RF classifier, numpy/scipy for signal processing, and optionally TensorFlow or PyTorch if you go the deep learning route.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Install pip and core scientific stack</span></div>
+      <pre><span class="comment"># Ensure pip is current</span>
+sudo apt install -y python3-pip python3-venv
+
+<span class="comment"># Create a virtual environment (keeps things clean)</span>
+python3 -m venv ~/pla-env
+source ~/pla-env/bin/activate
+
+<span class="comment"># Install ML and signal processing libraries</span>
+pip install numpy scipy scikit-learn matplotlib pandas joblib</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Optional — PyTorch (deep learning path)</span></div>
+      <div class="step-note">Only install this if you plan to use an LSTM or autoencoder-based PLA classifier per Melki et al. Not needed for SVM/RF.</div>
+      <pre><span class="comment"># CPU-only PyTorch (no GPU required)</span>
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Install requests library</span></div>
+      <div class="step-note">Used to push PLA trust scores to OPA's REST API.</div>
+      <pre>pip install requests</pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY</div>
+      <pre style="background:transparent;border:none;padding:0;font-size:11px;">source ~/pla-env/bin/activate
+python3 -c "import sklearn, numpy, scipy; print('OK')"</pre>
+      Should print <strong style="color:var(--green)">OK</strong> with no errors.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 06 · OPA -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="opa">
+  <div class="section-header">
+    <span class="sec-num">06</span>
+    <span class="sec-title">Open Policy Agent (OPA)</span>
+    <span class="sec-badge badge-binary">SINGLE BINARY</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      OPA is a single static binary — no package manager, no dependencies, no installation wizard. Download, make executable, move to PATH. It runs as a REST server on port 8181 and evaluates Rego policies when queried. This is the ZTA policy engine that will receive PLA trust scores from your Python classifier and make permit/deny decisions.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Download and install OPA binary</span></div>
+      <pre><span class="comment"># Download latest static binary for linux/amd64</span>
+curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+
+<span class="comment"># Make executable and move to PATH</span>
+chmod +x opa
+sudo mv opa /usr/local/bin/</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Test OPA in server mode</span></div>
+      <div class="step-note">Run this to confirm OPA starts correctly. It will listen on port 8181. Press Ctrl+C to stop — you don't need it running persistently yet.</div>
+      <pre><span class="comment"># Start OPA server (test run — Ctrl+C to stop)</span>
+opa run --server</pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY</div>
+      In a second terminal:
+      <pre style="background:transparent;border:none;padding:0;font-size:11px;">opa version
+curl http://localhost:8181/v1/data</pre>
+      <code>opa version</code> prints the version string. The curl should return <code style="font-family:monospace">{}</code> (empty data store — correct).
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 07 · KEYCLOAK -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="keycloak">
+  <div class="section-header">
+    <span class="sec-num">07</span>
+    <span class="sec-title">Keycloak (Identity Provider)</span>
+    <span class="sec-badge badge-java">REQUIRES JAVA 21</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      Keycloak is the identity and token issuance component of the ZTA stack. It handles OAuth2/OIDC token issuance for UE identities — OPA then validates these tokens alongside PLA trust scores. Keycloak requires Java 21+. The install is a tarball extract + run, no system-wide package manager needed.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 1 — Install Java 21</span></div>
+      <pre><span class="comment"># Install OpenJDK 21 (current LTS, required by Keycloak 26.x)</span>
+sudo apt install -y openjdk-21-jdk
+
+<span class="comment"># Set JAVA_HOME</span>
+echo 'JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"' | sudo tee -a /etc/environment
+source /etc/environment</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 2 — Download and extract Keycloak</span></div>
+      <div class="step-note">Keycloak 26.x is the current release as of 2025. Check <strong>https://github.com/keycloak/keycloak/releases</strong> and replace the version number below if a newer release is available.</div>
+      <pre><span class="comment"># Download Keycloak 26.x (check GitHub releases for latest)</span>
+cd /opt
+sudo wget https://github.com/keycloak/keycloak/releases/download/26.0.7/keycloak-26.0.7.tar.gz
+sudo tar -xvzf keycloak-26.0.7.tar.gz
+sudo mv keycloak-26.0.7 keycloak
+sudo rm keycloak-26.0.7.tar.gz
+
+<span class="comment"># Create a dedicated system user</span>
+sudo useradd -r -d /opt/keycloak -s /sbin/nologin keycloak
+sudo chown -R keycloak:keycloak /opt/keycloak</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 3 — Start Keycloak in dev mode</span></div>
+      <div class="step-note">Dev mode is appropriate for a research testbed. It uses an embedded H2 database (no PostgreSQL setup needed) and runs on HTTP port 8080. Do not use dev mode for anything internet-facing.</div>
+      <pre><span class="comment"># Start in development mode (runs on http://localhost:8080)</span>
+sudo -u keycloak /opt/keycloak/bin/kc.sh start-dev</pre>
+      <div style="margin-top:8px;font-size:11.5px;color:var(--text-dim)">First startup takes ~30–60 seconds. Leave this terminal open or set up a systemd service (see note below).</div>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Step 4 — Create admin user (first run only)</span></div>
+      <div class="step-note">On first startup, Keycloak will prompt you to create an admin account when you visit the web UI, or you can set it via environment variables before starting:</div>
+      <pre><span class="comment"># Set admin credentials before first start (run before kc.sh)</span>
+export KEYCLOAK_ADMIN=admin
+export KEYCLOAK_ADMIN_PASSWORD=changeme
+
+<span class="comment"># Then start:</span>
+sudo -E -u keycloak /opt/keycloak/bin/kc.sh start-dev</pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY</div>
+      Open browser → <strong style="color:var(--accent)">http://localhost:8080</strong><br>
+      You should see the Keycloak welcome page. Click <em>Administration Console</em> and log in with your admin credentials.
+    </div>
+
+    <div class="warn-box" style="margin-top:10px;">
+      <div class="wl">▸ PORT CONFLICT NOTE</div>
+      Keycloak defaults to port 8080. Open5GS WebUI also uses port 9999. No conflict there, but if you have anything else on 8080, Keycloak will fail to start. Check with <code style="font-family:monospace">sudo ss -tlnp | grep 8080</code> first.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 08 · PROMETHEUS + GRAFANA -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="prometheus">
+  <div class="section-header">
+    <span class="sec-num">08</span>
+    <span class="sec-title">Prometheus + Grafana (Monitoring)</span>
+    <span class="sec-badge badge-free">APT</span>
+  </div>
+  <div class="section-body">
+    <div class="about">
+      Prometheus scrapes and stores time-series metrics. Grafana visualizes them on dashboards. Together they give you the real-time monitoring panel equivalent to Yoon et al.'s Nokia monitoring interface — but entirely open-source. Prometheus is available directly from Ubuntu 24.04's apt repos. Grafana requires adding its own APT repo.
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Install Prometheus & Node Exporter</span></div>
+      <pre><span class="comment"># Both are in Ubuntu 24.04 apt repos</span>
+sudo apt install -y prometheus prometheus-node-exporter
+
+<span class="comment"># Enable and start</span>
+sudo systemctl enable prometheus prometheus-node-exporter
+sudo systemctl start prometheus prometheus-node-exporter</pre>
+      <div style="margin-top:7px;font-size:11.5px;color:var(--text-dim)">Prometheus UI available at <strong style="color:var(--accent)">http://localhost:9090</strong> after start.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Add Grafana APT repository and install</span></div>
+      <pre><span class="comment"># Install dependencies</span>
+sudo apt install -y apt-transport-https software-properties-common wget
+
+<span class="comment"># Add Grafana GPG key</span>
+sudo mkdir -p /etc/apt/keyrings/
+wget -q -O - https://apt.grafana.com/gpg.key | \
+  gpg --dearmor | \
+  sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+
+<span class="comment"># Add Grafana stable repo</span>
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] \
+https://apt.grafana.com stable main" | \
+  sudo tee /etc/apt/sources.list.d/grafana.list
+
+<span class="comment"># Install</span>
+sudo apt update
+sudo apt install -y grafana
+
+<span class="comment"># Enable and start</span>
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server</pre>
+    </div>
+
+    <div class="step">
+      <div class="step-label"><span class="sl-name">Open firewall ports (if UFW is re-enabled later)</span></div>
+      <pre><span class="comment"># Only needed if you later re-enable ufw</span>
+sudo ufw allow 9090/tcp   <span class="comment"># Prometheus</span>
+sudo ufw allow 3000/tcp   <span class="comment"># Grafana</span>
+sudo ufw allow 9100/tcp   <span class="comment"># Node Exporter</span></pre>
+    </div>
+
+    <div class="verify-box">
+      <div class="vl">▸ VERIFY</div>
+      Prometheus UI → <strong style="color:var(--accent)">http://localhost:9090</strong><br>
+      Grafana UI → <strong style="color:var(--accent)">http://localhost:3000</strong><br>
+      Grafana default login: <code style="font-family:monospace">admin</code> / <code style="font-family:monospace">admin</code> (you will be prompted to change password on first login).<br><br>
+      In Grafana: Connections → Data Sources → Add → Prometheus → URL: <code style="font-family:monospace">http://localhost:9090</code> → Save & Test.
+    </div>
+  </div>
+</div>
+
+<footer>
+  ZTA + PLA Install Guide · Ubuntu 24.04 LTS · All software free/open-source except MATLAB · Not for production use
+</footer>
+
+</body>
+</html>
